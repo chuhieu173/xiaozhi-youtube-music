@@ -5,16 +5,27 @@ import uvicorn
 
 app = FastAPI(title="Xiaozhi YouTube Music Server")
 
+# Cấu hình giả lập Android/iOS để vượt tường lửa YouTube trên Render
 YDL_OPTS_SEARCH = {
     "quiet": True,
     "skip_download": True,
     "extract_flat": True,
+    "extractor_args": {
+        "youtube": {
+            "player_client": ["android", "ios"]
+        }
+    }
 }
 
 YDL_OPTS_STREAM = {
     "format": "bestaudio/best",
     "quiet": True,
     "skip_download": True,
+    "extractor_args": {
+        "youtube": {
+            "player_client": ["android", "ios"]
+        }
+    }
 }
 
 @app.get("/")
@@ -52,7 +63,8 @@ def stream_song(id: str):
             audio_url = info.get("url")
             if not audio_url:
                 raise HTTPException(status_code=404, detail="Không tìm thấy luồng âm thanh")
-            # 302 Redirect thẳng tới luồng audio của YouTube
+            
+            # Chuyển hướng 302 trực tiếp tới luồng phát âm thanh
             return RedirectResponse(url=audio_url, status_code=302)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
